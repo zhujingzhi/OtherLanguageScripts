@@ -1,0 +1,2 @@
+# OtherLanguageScripts
+一些自己写的常用的其他语言的脚本
