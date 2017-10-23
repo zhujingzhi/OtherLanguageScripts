@@ -1,0 +1,39 @@
+@echo off 
+::if "%1" == "h" goto begin
+::mshta vbscript:createobject("wscript.shell").run("%~nx0 h",0)(window.close)&&exit 
+:begin 
+rem 定义循环间隔时间和监测的服务：
+set secs=60
+rem 根据自己的需要进行更改
+set srvname="Squid"
+ 
+echo.
+echo ========================================
+echo ==	    某某公司%srvname%服务监控程序  ==
+echo ==     查询计算机服务的状态，         ==
+echo ==     每间隔%secs%秒种进行一次查询， ==
+echo ==     如发现其停止，则立即启动。     ==
+echo ========================================
+echo.
+echo 此脚本监测的服务是：%srvname%
+echo.
+
+if %srvname%. == . goto end
+
+:chkit
+for /f "skip=3 tokens=4" %%i in ('sc query %srvname%') do set "zt=%%i" &goto :next
+
+:next
+if /i "%zt%"=="RUNNING" (goto loop)
+if /i "%zt%"=="STOPPED" (goto startserver)
+
+:startserver
+net start Squid
+goto chkit
+
+:loop
+rem 下面的命令用于延时，否则可能会导致cpu单个核心满载。
+ping -n %secs% 127.0.0.1 > nul
+goto chkit
+
+:end
