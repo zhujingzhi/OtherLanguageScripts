@@ -1,0 +1,46 @@
+@echo off 
+::if "%1" == "h" goto begin 
+::取消下面代码的注释可以使本脚本挂载到后台 进程名为cmd.exe
+::mshta vbscript:createobject("wscript.shell").run("%~nx0 h",0)(window.close)&&exit 
+:begin 
+rem 定义循环间隔时间和监测的服务：
+set secs=600
+::根据自己的需求修改监控的进程名称
+set srvname="python.exe"
+set num=0
+ 
+echo.
+echo ========================================
+echo ==	    某某公司Py进程监控程序：	   ==
+echo ==     查询计算机服务的状态，         ==
+echo ==     每间隔%secs%秒种进行一次查询， ==
+echo ==     如发现其停止，则立即启动。     ==
+echo ========================================
+echo.
+echo 此脚本监测的服务是：%srvname%
+echo.
+
+if %srvname%. == . goto end
+
+:chkit
+for /f "delims=" %%a in ('tasklist ^| find /i "%name%"') do (
+    if /i not "%%a" == "" (
+        set /a num+=1
+    )
+)
+goto :next
+
+:next
+if /i "%num%" equ 2 (goto loop)
+if /i "%num%" lss 2 (goto startserver)
+
+:startserver
+c:\Python27\python.exe c:\codeing\code.py
+goto chkit
+
+:loop
+rem 下面的命令用于延时，否则可能会导致cpu单个核心满载。
+ping -n %secs% 127.0.0.1 > nul
+goto chkit
+
+:end
